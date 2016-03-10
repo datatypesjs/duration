@@ -3,7 +3,7 @@ import durationFragments from './fragments'
 export default class Duration {
 	constructor (durationString) {
 		let durationPattern =
-			'P' +
+			'^P' +
 			'(?:(\\d+)Y)?' + // Years
 			'(?:(\\d+)M)?' + // Months
 			'(?:(\\d+)W)?' + // Weeks
@@ -12,16 +12,30 @@ export default class Duration {
 			'(?:(\\d+)H)?' + // Hours
 			'(?:(\\d+)M)?' + // Minutes
 			'(?:(\\d+)?' +   // Seconds
-			'\\.?(\\d+)?S)?' // Milliseconds
+			'\\.?(\\d+)?S)?' + // Milliseconds
+			'$'
 
 		let regex = new RegExp(durationPattern, 'i')
 		let durationArray = durationString.match(regex)
 
+		if (!durationArray) {
+			throw new Error(`"${durationString}" is an invalid duration string`)
+		}
+
 		durationFragments.forEach((fragment, index) => {
 			let value = Number(durationArray[index + 1])
-			if (value)
+
+			if (typeof value === 'number' && !Number.isNaN(value)) {
+				this._precision = fragment.replace('s', '')
 				this[fragment] = value
+			}
 		})
+	}
+
+	get precision () { return this._precision }
+	set precision (precision) {
+		this._precision = precision
+		return this
 	}
 
 	get string () {
