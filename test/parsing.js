@@ -1,6 +1,6 @@
 import runTest from 'ava'
 import expect from 'unexpected'
-import Duration from '../build/index.js'
+import Duration from '../source/index.js'
 
 runTest('P7Y', test => {
 	expect(

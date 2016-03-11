@@ -81,6 +81,14 @@ export default class Duration {
 		return this
 	}
 
+	get isAccurate () {
+		return (
+			this.years == null &&
+			this.months == null &&
+			this.days == null
+		)
+	}
+
 	get string () {
 		return durationFragments
 			.reduce(
