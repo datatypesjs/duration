@@ -33,11 +33,14 @@ export default class Duration {
 			`"${durationString}" is an invalid duration string`
 		)
 
+		// Milliseconds
+		durationArray[8] = Number('0.' + durationArray[8]) * 1000
+
 		durationFragments.forEach((fragment, index) => {
 			let value = Number(durationArray[index + 1])
 
 			if (typeof value === 'number' && !Number.isNaN(value)) {
-				this[fragment] = value
+				this['_' + fragment] = value
 			}
 		})
 	}
@@ -126,29 +129,30 @@ export default class Duration {
 	get string () {
 		return durationFragments
 			.reduce(
-				(string, fragment) => {
-					if (this[fragment] == null) {
+				(string, fragment, fragmentIndex) => {
+					if (typeof this[fragment] !== 'number' ||
+						Number.isNaN(this[fragment])
+					) {
 						return string
 					}
 
-					if (fragment === 'minutes' && !string.includes('t')) {
-						string += 't'
+					// fragmentIndex > 3 means smaller than day
+					if (!string.includes('T') && fragmentIndex > 3) {
+						string += 'T'
 					}
 
-					string += this[fragment] + fragment.substr(0, 1)
-
-					if (fragment === 'days') {
-						string += 't'
-					}
 					if (fragment === 'milliseconds') {
-						string.replace('s', '.' + this[fragment] + 's')
+						string = string
+							.replace(/s$/, `.${this.milliseconds}S`)
+					}
+					else {
+						string += this[fragment] + fragment.substr(0, 1)
 					}
 
 					return string
 				},
 				'p'
 			)
-			.replace(/t$/, '')
 			.toUpperCase()
 	}
 	toString () { return this.string }

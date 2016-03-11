@@ -55,7 +55,7 @@ runTest('P7H', test => {
 		new Duration(test.title).toObject(),
 		'to equal',
 		{
-			string: test.title,
+			string: 'PT7H',
 			hours: 7,
 			isAccurate: true,
 		}
@@ -79,7 +79,7 @@ runTest('PT7M', test => {
 runTest('P7H30M', test => {
 	const duration = new Duration(test.title)
 	const referenceObject = {
-		string: 'P7HT30M',
+		string: 'PT7H30M',
 		hours: 7,
 		minutes: 30,
 		isAccurate: true,
@@ -93,7 +93,7 @@ runTest('P7S', test => {
 		new Duration(test.title).toObject(),
 		'to equal',
 		{
-			string: test.title,
+			string: 'PT7S',
 			seconds: 7,
 			isAccurate: true,
 		}
@@ -105,9 +105,23 @@ runTest('P7.345S', test => {
 		new Duration(test.title).toObject(),
 		'to equal',
 		{
-			string: 'P7S345M',
+			string: 'PT7.345S',
 			seconds: 7,
 			milliseconds: 345,
+			isAccurate: true,
+		}
+	)
+})
+
+
+runTest('P7.3S', test => {
+	expect(
+		new Duration(test.title).toObject(),
+		'to equal',
+		{
+			string: 'PT7.300S',
+			seconds: 7,
+			milliseconds: 300,
 			isAccurate: true,
 		}
 	)
