@@ -43,6 +43,38 @@ export default class Duration {
 		})
 	}
 
+	get years () { return this._years }
+	set years (years) { this._years = years }
+	setYears (years) { this.years = years; return this }
+
+	get months () { return this._months }
+	set months (months) { this._months = months }
+	setMonths (months) { this.months = months; return this }
+
+	get days () { return this._days }
+	set days (days) { this._days = days }
+	setDays (days) { this.days = days; return this }
+
+	get hours () { return this._hours }
+	set hours (hours) { this._hours = hours }
+	setHours (hours) { this.hours = hours; return this }
+
+	get minutes () { return this._minutes}
+	set minutes (minutes) { this._minutes = minutes }
+	setMinutes (minutes) { this.minutes = minutes; return this }
+
+	get seconds () { return this._seconds}
+	set seconds (seconds) { this._seconds = seconds }
+	setSeconds (seconds) { this.seconds = seconds; return this  }
+
+	get milliseconds () { return this._milliseconds }
+	set milliseconds (milliseconds) { this._milliseconds = milliseconds }
+	setMilliseconds (milliseconds) {
+		this.milliseconds = milliseconds
+		return this
+	}
+
+
 	get precision () { return this._precision }
 	set precision (precision) {
 		this._precision = precision
