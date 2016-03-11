@@ -1,6 +1,6 @@
 {
   "name": "@datatypes/duration",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Full ISO 8601 compatible duration class",
   "main": "build/index.js",
   "directories": {
