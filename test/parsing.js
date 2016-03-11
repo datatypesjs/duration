@@ -9,6 +9,7 @@ runTest('P7Y', test => {
 		{
 			string: test.title,
 			years: 7,
+			isAccurate: false,
 		}
 	)
 })
@@ -20,6 +21,7 @@ runTest('P7M', test => {
 		{
 			string: test.title,
 			months: 7,
+			isAccurate: false,
 		}
 	)
 })
@@ -31,6 +33,7 @@ runTest('P7W', test => {
 		{
 			string: test.title,
 			weeks: 7,
+			isAccurate: false,
 		}
 	)
 })
@@ -42,6 +45,7 @@ runTest('P7D', test => {
 		{
 			string: test.title,
 			days: 7,
+			isAccurate: false,
 		}
 	)
 })
@@ -53,6 +57,7 @@ runTest('P7H', test => {
 		{
 			string: test.title,
 			hours: 7,
+			isAccurate: true,
 		}
 	)
 })
@@ -64,6 +69,7 @@ runTest('PT7M', test => {
 		{
 			string: test.title,
 			minutes: 7,
+			isAccurate: true,
 		}
 	)
 })
@@ -73,11 +79,13 @@ runTest('PT7M', test => {
 runTest('P7H30M', test => {
 	const duration = new Duration(test.title)
 	const referenceObject = {
-		string: test.title,
+		string: 'P7HT30M',
 		hours: 7,
 		minutes: 30,
+		isAccurate: true,
 	}
-	expect(duration.object, 'to equal', referenceObject.object)
+
+	expect(duration.object, 'to equal', referenceObject)
 })
 
 runTest('P7S', test => {
@@ -87,6 +95,7 @@ runTest('P7S', test => {
 		{
 			string: test.title,
 			seconds: 7,
+			isAccurate: true,
 		}
 	)
 })
@@ -99,6 +108,7 @@ runTest('P7.345S', test => {
 			string: 'P7S345M',
 			seconds: 7,
 			milliseconds: 345,
+			isAccurate: true,
 		}
 	)
 })
@@ -110,7 +120,8 @@ runTest('P7Y5M', test => {
 		{
 			string: test.title,
 			years: 7,
-			months: 5
+			months: 5,
+			isAccurate: false,
 		}
 	)
 })
@@ -127,6 +138,7 @@ runTest('P3Y6M4DT12H30M5S', test => {
 			hours: 12,
 			minutes: 30,
 			seconds: 5,
+			isAccurate: false,
 		}
 	)
 })

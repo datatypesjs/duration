@@ -41,3 +41,25 @@ runTest('let months bubble up', test => {
 
 	expect(duration.object, 'to equal', referenceDuration.object)
 })
+
+
+// Unsafe normalize
+
+runTest('let hours bubble up', test => {
+	const duration = new Duration()
+		.setHours(50)
+		.unsafeNormalize()
+	const referenceDuration = new Duration('P2D2H')
+
+	expect(duration.object, 'to equal', referenceDuration.object)
+})
+
+runTest('remove months and let days bubble up', test => {
+	const duration = new Duration()
+		.setMonths(5)
+		.setDays(500)
+		.unsafeNormalize()
+	const referenceDuration = new Duration('P1Y285D')
+
+	expect(duration.object, 'to equal', referenceDuration.object)
+})

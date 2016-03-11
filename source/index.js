@@ -51,6 +51,10 @@ export default class Duration {
 	set months (months) { this._months = months }
 	setMonths (months) { this.months = months; return this }
 
+	get weeks () { return this._weeks }
+	set weeks (weeks) { this._weeks = weeks }
+	setWeeks (weeks) { this.weeks = weeks; return this }
+
 	get days () { return this._days }
 	set days (days) { this._days = days }
 	setDays (days) { this.days = days; return this }
@@ -82,12 +86,27 @@ export default class Duration {
 	}
 
 	get isAccurate () {
-		return (
-			this.years == null &&
-			this.months == null &&
-			this.days == null
-		)
+		if (this.hasOwnProperty('_isAccurate')) {
+			return this._isAccurate
+		}
+		else {
+			// Millisecond, second, hour & minute are considered accurate units
+			// by ignoring leap seconds (also check out this.normalize)
+			return (
+				this.years == null &&
+				this.months == null &&
+				this.weeks == null &&
+				this.days == null
+			)
+		}
 	}
+	set isAccurate (value) {
+		if (value === undefined) {
+			delete this._isAccurate
+		}
+		this._isAccurate = value
+	}
+
 
 	get string () {
 		return durationFragments
@@ -117,12 +136,11 @@ export default class Duration {
 			.replace(/t$/, '')
 			.toUpperCase()
 	}
+	toString () { return this.string }
+	toJSON () { return this.string }
 
-	toString () {
-		return this.string
-	}
 
-	toObject () {
+	get object () {
 		return durationFragments.reduce(
 			(object, fragment) => {
 				if (this[fragment] != null)
@@ -130,21 +148,20 @@ export default class Duration {
 				return object
 			},
 			{
-				string: this.string
+				string: this.string,
+				isAccurate: this.isAccurate
 			}
 		)
 	}
+	toObject () { return this.object }
 
-	toJSON () {
-		return this.toObject()
-	}
 
 	normalize () {
 		// Let all values bubble up as high as possible without changing
 		// the accuracy
 		// e.g 70000 ms = 1 minute and 10 seconds
 		// Millisecond, second, hour & minute are considered accurate units
-		// and therefore leap seconds are ignored
+		// by ignoring leap seconds
 
 		if (this._milliseconds >= 1000) {
 			this._seconds = this._seconds || 0
@@ -173,6 +190,36 @@ export default class Duration {
 			this._years = this._years || 0
 			this._years += Math.floor(this._months / 12)
 			this._months = this._months % 12
+		}
+
+		return this
+	}
+
+	unsafeNormalize () {
+		// Minimizes error by using ordinal dates and therefore
+		// convertig surplus months to days and converting days to years
+
+		this._isAccurate = false
+
+		this.normalize()
+
+		// Assmues that 1 day has 24 hours and 1 month has 30 days
+
+		if (this._hours >= 24) {
+			this._days = this._days || 0
+			this._days += Math.floor(this._hours / 24)
+			this._hours = this._hours % 24
+		}
+
+		if (this._months) {
+			this._days += this._months * 30
+			delete this._months
+		}
+
+		if (this._days >= 365) {
+			this._years = this._years || 0
+			this._years += Math.floor(this._days / 365)
+			this._days = this._days % 365
 		}
 
 		return this
