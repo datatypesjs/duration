@@ -68,6 +68,18 @@ runTest('PT7M', test => {
 	)
 })
 
+// Test that M doesn't get parsed as months without time separator
+// but leading hour
+runTest('P7H30M', test => {
+	const duration = new Duration(test.title)
+	const referenceObject = {
+		string: test.title,
+		hours: 7,
+		minutes: 30,
+	}
+	expect(duration.object, 'to equal', referenceObject.object)
+})
+
 runTest('P7S', test => {
 	expect(
 		new Duration(test.title).toObject(),

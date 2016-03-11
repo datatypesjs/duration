@@ -138,4 +138,43 @@ export default class Duration {
 	toJSON () {
 		return this.toObject()
 	}
+
+	normalize () {
+		// Let all values bubble up as high as possible without changing
+		// the accuracy
+		// e.g 70000 ms = 1 minute and 10 seconds
+		// Millisecond, second, hour & minute are considered accurate units
+		// and therefore leap seconds are ignored
+
+		if (this._milliseconds >= 1000) {
+			this._seconds = this._seconds || 0
+			this._seconds += Math.floor(this._milliseconds / 1000)
+			this._milliseconds = this._milliseconds % 1000
+		}
+
+		if (this._seconds >= 60) {
+			this._minutes = this._minutes || 0
+			this._minutes += Math.floor(this._seconds / 60)
+			this._seconds = this._seconds % 60
+		}
+
+		if (this._minutes >= 60) {
+			this._hours = this._hours || 0
+			this._hours += Math.floor(this._minutes / 60)
+			this._minutes = this._minutes % 60
+		}
+
+		// 1 day has not always 24 hours (+- leap second),
+		// 1 month has not always 31 days and 1 year has not always 365 days.
+		// Therefore they can't bubble up
+
+		// But 1 year always has 12 months
+		if (this._months >= 12) {
+			this._years = this._years || 0
+			this._years += Math.floor(this._months / 12)
+			this._months = this._months % 12
+		}
+
+		return this
+	}
 }
