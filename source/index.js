@@ -14,15 +14,15 @@ export default class Duration {
 
 		let durationPattern =
 			'^P' +
-			'(?:(\\d+)Y)?' + // Years
-			'(?:(\\d+)M)?' + // Months
-			'(?:(\\d+)W)?' + // Weeks
-			'(?:(\\d+)D)?' + // Days
+			'(?:([0-9]+)Y)?' + // Years
+			'(?:([0-9]+)M)?' + // Months
+			'(?:([0-9]+)W)?' + // Weeks
+			'(?:([0-9]+)D)?' + // Days
 			'T?' +
-			'(?:(\\d+)H)?' + // Hours
-			'(?:(\\d+)M)?' + // Minutes
-			'(?:(\\d+)?' +   // Seconds
-			'\\.?(\\d+)?S)?' + // Milliseconds
+			'(?:([0-9]+)H)?' + // Hours
+			'(?:([0-9]+)M)?' + // Minutes
+			'(?:([0-9]+)?' +   // Seconds
+			'(?:\\.([0-9]{1,3}))?S)?' + // Milliseconds
 			'$'
 
 		let regex = new RegExp(durationPattern, 'i')
