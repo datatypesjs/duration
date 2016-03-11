@@ -2,6 +2,16 @@ import durationFragments from './fragments'
 
 export default class Duration {
 	constructor (durationString) {
+		if (!durationString) {
+			return this
+		}
+
+		console.assert(
+			typeof durationString === 'string',
+			'Type of argument must be "string" and not "' +
+			typeof durationString + '"'
+		)
+
 		let durationPattern =
 			'^P' +
 			'(?:(\\d+)Y)?' + // Years
@@ -18,15 +28,16 @@ export default class Duration {
 		let regex = new RegExp(durationPattern, 'i')
 		let durationArray = durationString.match(regex)
 
-		if (!durationArray) {
-			throw new Error(`"${durationString}" is an invalid duration string`)
-		}
+		console.assert(
+			durationArray,
+			`"${durationString}" is an invalid duration string`
+		)
 
 		durationFragments.forEach((fragment, index) => {
 			let value = Number(durationArray[index + 1])
 
 			if (typeof value === 'number' && !Number.isNaN(value)) {
-				this._precision = fragment.replace('s', '')
+				this._precision = fragment.replace(/s$/, '')
 				this[fragment] = value
 			}
 		})
