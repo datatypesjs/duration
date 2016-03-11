@@ -37,7 +37,6 @@ export default class Duration {
 			let value = Number(durationArray[index + 1])
 
 			if (typeof value === 'number' && !Number.isNaN(value)) {
-				this._precision = fragment.replace(/s$/, '')
 				this[fragment] = value
 			}
 		})
@@ -79,7 +78,23 @@ export default class Duration {
 	}
 
 
-	get precision () { return this._precision }
+	get precision () {
+		let precision
+
+		// Clone array as .reverse() is in place
+		Array.from(durationFragments)
+			.reverse()
+			.some(fragment => {
+				const value = this[fragment]
+
+				if (typeof value === 'number' && !Number.isNaN(value)) {
+					precision = fragment.replace(/s$/, '')
+					return true
+				}
+			})
+
+		return precision
+	}
 	set precision (precision) {
 		this._precision = precision
 		return this
