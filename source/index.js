@@ -81,6 +81,64 @@ export default class Duration {
 	}
 
 
+	// Interval bounds. When two of {start, end, duration components} are
+	// known, the third is computed on demand. Setting start or end with
+	// the other already known invalidates the duration components and
+	// rebuilds them; reads of start/end derive from start/end + duration
+	// when not explicitly stored.
+	get start () {
+		if (this._start != null) return this._start
+		if (this._end != null && this._hasDurationComponents()) {
+			return new Date(this._end.getTime() - this.asMilliseconds)
+		}
+		return undefined
+	}
+	set start (date) {
+		this._start = date
+		if (this._end != null) {
+			this._rebuildDuration()
+		}
+	}
+	setStart (date) { this.start = date; return this }
+
+	get end () {
+		if (this._end != null) return this._end
+		if (this._start != null && this._hasDurationComponents()) {
+			return new Date(this._start.getTime() + this.asMilliseconds)
+		}
+		return undefined
+	}
+	set end (date) {
+		this._end = date
+		if (this._start != null) {
+			this._rebuildDuration()
+		}
+	}
+	setEnd (date) { this.end = date; return this }
+
+	_hasDurationComponents () {
+		return durationFragments.some(fragment =>
+			typeof this['_' + fragment] === 'number' &&
+			!Number.isNaN(this['_' + fragment])
+		)
+	}
+
+	_rebuildDuration () {
+		durationFragments.forEach(fragment => {
+			delete this['_' + fragment]
+		})
+		this._milliseconds = this._end.getTime() - this._start.getTime()
+		this.normalize()
+	}
+
+	rebuild () {
+		if (this._start != null && this._end != null) {
+			this._rebuildDuration()
+		}
+		return this
+	}
+
+
 	// Conversions to a single unit (including fraction).
 	// Months are approximated as 30 days and years as 365 days
 	// (matches the assumptions used by `unsafeNormalize`).
