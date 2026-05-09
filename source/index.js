@@ -81,6 +81,39 @@ export default class Duration {
 	}
 
 
+	// Conversions to a single unit (including fraction).
+	// Months are approximated as 30 days and years as 365 days
+	// (matches the assumptions used by `unsafeNormalize`).
+	get asMilliseconds () {
+		const msPerSecond = 1000
+		const msPerMinute = 60 * msPerSecond
+		const msPerHour = 60 * msPerMinute
+		const msPerDay = 24 * msPerHour
+		const msPerWeek = 7 * msPerDay
+		const msPerMonth = 30 * msPerDay
+		const msPerYear = 365 * msPerDay
+
+		return (
+			(this._milliseconds || 0) +
+			(this._seconds || 0) * msPerSecond +
+			(this._minutes || 0) * msPerMinute +
+			(this._hours || 0) * msPerHour +
+			(this._days || 0) * msPerDay +
+			(this._weeks || 0) * msPerWeek +
+			(this._months || 0) * msPerMonth +
+			(this._years || 0) * msPerYear
+		)
+	}
+
+	get asSeconds () { return this.asMilliseconds / 1000 }
+	get asMinutes () { return this.asMilliseconds / (1000 * 60) }
+	get asHours () { return this.asMilliseconds / (1000 * 60 * 60) }
+	get asDays () { return this.asMilliseconds / (1000 * 60 * 60 * 24) }
+	get asWeeks () { return this.asDays / 7 }
+	get asMonths () { return this.asDays / 30 }
+	get asYears () { return this.asDays / 365 }
+
+
 	get precision () {
 		let precision
 
