@@ -1,9 +1,33 @@
-import durationFragments from './fragments'
+import durationFragments, { DurationFragment } from './fragments'
+
+export type HumanReadableFormat = 'long' | 'short' | 'clock'
+
+// Allow any string at the type boundary (preserves the runtime
+// "Unknown format" error path) while still giving autocomplete
+// for the three known formats.
+type HumanReadableFormatInput = HumanReadableFormat | (string & {})
+
+type FragmentField = `_${DurationFragment}`
 
 export default class Duration {
-	constructor (durationString) {
+	_years?: number
+	_months?: number
+	_weeks?: number
+	_days?: number
+	_hours?: number
+	_minutes?: number
+	_seconds?: number
+	_milliseconds?: number
+
+	_start?: Date
+	_end?: Date
+
+	_isAccurate?: boolean
+	_precision?: string
+
+	constructor (durationString?: string) {
 		if (!durationString) {
-			return this
+			return
 		}
 
 		console.assert(
@@ -12,7 +36,7 @@ export default class Duration {
 			typeof durationString + '"'
 		)
 
-		let durationPattern =
+		const durationPattern =
 			'^P' +
 			'(?:([0-9]+)Y)?' + // Years
 			'(?:([0-9]+)M)?' + // Months
@@ -25,57 +49,60 @@ export default class Duration {
 			'(?:\\.([0-9]{1,3}))?S)?' + // Milliseconds
 			'$'
 
-		let regex = new RegExp(durationPattern, 'i')
-		let durationArray = durationString.match(regex)
+		const regex = new RegExp(durationPattern, 'i')
+		const durationArray = durationString.match(regex)
 
 		console.assert(
-			durationArray,
+			Boolean(durationArray),
 			`"${durationString}" is an invalid duration string`
 		)
 
-		// Milliseconds
-		durationArray[8] = Number('0.' + durationArray[8]) * 1000
+		if (!durationArray) return
+
+		const fractionalMs = Number('0.' + durationArray[8]) * 1000
 
 		durationFragments.forEach((fragment, index) => {
-			let value = Number(durationArray[index + 1])
+			const value = index === 7
+				? fractionalMs
+				: Number(durationArray[index + 1])
 
 			if (typeof value === 'number' && !Number.isNaN(value)) {
-				this['_' + fragment] = value
+				this[`_${fragment}`] = value
 			}
 		})
 	}
 
 	get years () { return this._years }
-	set years (years) { this._years = years }
-	setYears (years) { this.years = years; return this }
+	set years (years: number | undefined) { this._years = years }
+	setYears (years: number | undefined) { this.years = years; return this }
 
 	get months () { return this._months }
-	set months (months) { this._months = months }
-	setMonths (months) { this.months = months; return this }
+	set months (months: number | undefined) { this._months = months }
+	setMonths (months: number | undefined) { this.months = months; return this }
 
 	get weeks () { return this._weeks }
-	set weeks (weeks) { this._weeks = weeks }
-	setWeeks (weeks) { this.weeks = weeks; return this }
+	set weeks (weeks: number | undefined) { this._weeks = weeks }
+	setWeeks (weeks: number | undefined) { this.weeks = weeks; return this }
 
 	get days () { return this._days }
-	set days (days) { this._days = days }
-	setDays (days) { this.days = days; return this }
+	set days (days: number | undefined) { this._days = days }
+	setDays (days: number | undefined) { this.days = days; return this }
 
 	get hours () { return this._hours }
-	set hours (hours) { this._hours = hours }
-	setHours (hours) { this.hours = hours; return this }
+	set hours (hours: number | undefined) { this._hours = hours }
+	setHours (hours: number | undefined) { this.hours = hours; return this }
 
-	get minutes () { return this._minutes}
-	set minutes (minutes) { this._minutes = minutes }
-	setMinutes (minutes) { this.minutes = minutes; return this }
+	get minutes () { return this._minutes }
+	set minutes (minutes: number | undefined) { this._minutes = minutes }
+	setMinutes (minutes: number | undefined) { this.minutes = minutes; return this }
 
-	get seconds () { return this._seconds}
-	set seconds (seconds) { this._seconds = seconds }
-	setSeconds (seconds) { this.seconds = seconds; return this  }
+	get seconds () { return this._seconds }
+	set seconds (seconds: number | undefined) { this._seconds = seconds }
+	setSeconds (seconds: number | undefined) { this.seconds = seconds; return this }
 
 	get milliseconds () { return this._milliseconds }
-	set milliseconds (milliseconds) { this._milliseconds = milliseconds }
-	setMilliseconds (milliseconds) {
+	set milliseconds (milliseconds: number | undefined) { this._milliseconds = milliseconds }
+	setMilliseconds (milliseconds: number | undefined) {
 		this.milliseconds = milliseconds
 		return this
 	}
@@ -86,48 +113,48 @@ export default class Duration {
 	// the other already known invalidates the duration components and
 	// rebuilds them; reads of start/end derive from start/end + duration
 	// when not explicitly stored.
-	get start () {
+	get start (): Date | undefined {
 		if (this._start != null) return this._start
 		if (this._end != null && this._hasDurationComponents()) {
 			return new Date(this._end.getTime() - this.asMilliseconds)
 		}
 		return undefined
 	}
-	set start (date) {
+	set start (date: Date | undefined) {
 		this._start = date
 		if (this._end != null) {
 			this._rebuildDuration()
 		}
 	}
-	setStart (date) { this.start = date; return this }
+	setStart (date: Date | undefined) { this.start = date; return this }
 
-	get end () {
+	get end (): Date | undefined {
 		if (this._end != null) return this._end
 		if (this._start != null && this._hasDurationComponents()) {
 			return new Date(this._start.getTime() + this.asMilliseconds)
 		}
 		return undefined
 	}
-	set end (date) {
+	set end (date: Date | undefined) {
 		this._end = date
 		if (this._start != null) {
 			this._rebuildDuration()
 		}
 	}
-	setEnd (date) { this.end = date; return this }
+	setEnd (date: Date | undefined) { this.end = date; return this }
 
-	_hasDurationComponents () {
-		return durationFragments.some(fragment =>
-			typeof this['_' + fragment] === 'number' &&
-			!Number.isNaN(this['_' + fragment])
-		)
+	_hasDurationComponents (): boolean {
+		return durationFragments.some(fragment => {
+			const value = this[`_${fragment}`]
+			return typeof value === 'number' && !Number.isNaN(value)
+		})
 	}
 
 	_rebuildDuration () {
 		durationFragments.forEach(fragment => {
-			delete this['_' + fragment]
+			delete this[`_${fragment}`]
 		})
-		this._milliseconds = this._end.getTime() - this._start.getTime()
+		this._milliseconds = this._end!.getTime() - this._start!.getTime()
 		this.normalize()
 	}
 
@@ -142,7 +169,7 @@ export default class Duration {
 	// Conversions to a single unit (including fraction).
 	// Months are approximated as 30 days and years as 365 days
 	// (matches the assumptions used by `unsafeNormalize`).
-	get asMilliseconds () {
+	get asMilliseconds (): number {
 		const msPerSecond = 1000
 		const msPerMinute = 60 * msPerSecond
 		const msPerHour = 60 * msPerMinute
@@ -172,8 +199,8 @@ export default class Duration {
 	get asYears () { return this.asDays / 365 }
 
 
-	get precision () {
-		let precision
+	get precision (): string | undefined {
+		let precision: string | undefined
 
 		// Clone array as .reverse() is in place
 		Array.from(durationFragments)
@@ -185,18 +212,18 @@ export default class Duration {
 					precision = fragment.replace(/s$/, '')
 					return true
 				}
+				return false
 			})
 
 		return precision
 	}
-	set precision (precision) {
+	set precision (precision: string | undefined) {
 		this._precision = precision
-		return this
 	}
 
-	get isAccurate () {
-		if (this.hasOwnProperty('_isAccurate')) {
-			return this._isAccurate
+	get isAccurate (): boolean {
+		if (Object.prototype.hasOwnProperty.call(this, '_isAccurate')) {
+			return this._isAccurate as boolean
 		}
 		else {
 			// Millisecond, second, hour & minute are considered accurate units
@@ -209,7 +236,7 @@ export default class Duration {
 			)
 		}
 	}
-	set isAccurate (value) {
+	set isAccurate (value: boolean | undefined) {
 		if (value === undefined) {
 			delete this._isAccurate
 		}
@@ -217,13 +244,12 @@ export default class Duration {
 	}
 
 
-	get string () {
+	get string (): string {
 		return durationFragments
-			.reduce(
+			.reduce<string>(
 				(string, fragment, fragmentIndex) => {
-					if (typeof this[fragment] !== 'number' ||
-						Number.isNaN(this[fragment])
-					) {
+					const value = this[fragment]
+					if (typeof value !== 'number' || Number.isNaN(value)) {
 						return string
 					}
 
@@ -237,7 +263,7 @@ export default class Duration {
 							.replace(/s$/, `.${this.milliseconds}S`)
 					}
 					else {
-						string += this[fragment] + fragment.substr(0, 1)
+						string += value + fragment.substr(0, 1)
 					}
 
 					return string
@@ -250,8 +276,8 @@ export default class Duration {
 	toJSON () { return this.string }
 
 
-	toHumanReadable (format = 'long') {
-		const longLabels = {
+	toHumanReadable (format: HumanReadableFormatInput = 'long'): string {
+		const longLabels: Record<DurationFragment, [string, string]> = {
 			years: ['Year', 'Years'],
 			months: ['Month', 'Months'],
 			weeks: ['Week', 'Weeks'],
@@ -261,7 +287,7 @@ export default class Duration {
 			seconds: ['Second', 'Seconds'],
 			milliseconds: ['Millisecond', 'Milliseconds'],
 		}
-		const shortLabels = {
+		const shortLabels: Record<DurationFragment, string> = {
 			years: 'y',
 			months: 'mo',
 			weeks: 'w',
@@ -272,10 +298,10 @@ export default class Duration {
 			milliseconds: 'ms',
 		}
 
-		const setFragments = durationFragments.filter(fragment =>
-			typeof this[fragment] === 'number' &&
-			!Number.isNaN(this[fragment])
-		)
+		const setFragments = durationFragments.filter(fragment => {
+			const value = this[fragment]
+			return typeof value === 'number' && !Number.isNaN(value)
+		})
 
 		if (setFragments.length === 0) return ''
 
@@ -296,18 +322,18 @@ export default class Duration {
 		}
 
 		if (format === 'clock') {
-			const bigUnits = ['years', 'months', 'weeks', 'days']
+			const bigUnits: DurationFragment[] = ['years', 'months', 'weeks', 'days']
 			const bigParts = setFragments
 				.filter(fragment => bigUnits.includes(fragment))
 				.map(fragment => `${this[fragment]} ${shortLabels[fragment]}`)
 
 			const hasTimeUnits = setFragments.some(fragment =>
-				['hours', 'minutes', 'seconds'].includes(fragment)
+				(['hours', 'minutes', 'seconds'] as DurationFragment[]).includes(fragment)
 			)
 
 			const parts = bigParts.slice()
 			if (hasTimeUnits) {
-				const pad = number => String(number).padStart(2, '0')
+				const pad = (number: number) => String(number).padStart(2, '0')
 				const time =
 					`${pad(this._hours || 0)}:` +
 					`${pad(this._minutes || 0)}:` +
@@ -321,8 +347,8 @@ export default class Duration {
 	}
 
 
-	get object () {
-		return durationFragments.reduce(
+	get object (): Record<string, unknown> {
+		return durationFragments.reduce<Record<string, unknown>>(
 			(object, fragment) => {
 				if (this[fragment] != null)
 					object[fragment] = this[fragment]
@@ -330,7 +356,7 @@ export default class Duration {
 			},
 			{
 				string: this.string,
-				isAccurate: this.isAccurate
+				isAccurate: this.isAccurate,
 			}
 		)
 	}
@@ -344,22 +370,22 @@ export default class Duration {
 		// Millisecond, second, hour & minute are considered accurate units
 		// by ignoring leap seconds
 
-		if (this._milliseconds >= 1000) {
+		if ((this._milliseconds ?? 0) >= 1000) {
 			this._seconds = this._seconds || 0
-			this._seconds += Math.floor(this._milliseconds / 1000)
-			this._milliseconds = this._milliseconds % 1000
+			this._seconds += Math.floor(this._milliseconds! / 1000)
+			this._milliseconds = this._milliseconds! % 1000
 		}
 
-		if (this._seconds >= 60) {
+		if ((this._seconds ?? 0) >= 60) {
 			this._minutes = this._minutes || 0
-			this._minutes += Math.floor(this._seconds / 60)
-			this._seconds = this._seconds % 60
+			this._minutes += Math.floor(this._seconds! / 60)
+			this._seconds = this._seconds! % 60
 		}
 
-		if (this._minutes >= 60) {
+		if ((this._minutes ?? 0) >= 60) {
 			this._hours = this._hours || 0
-			this._hours += Math.floor(this._minutes / 60)
-			this._minutes = this._minutes % 60
+			this._hours += Math.floor(this._minutes! / 60)
+			this._minutes = this._minutes! % 60
 		}
 
 		// 1 day has not always 24 hours (+- leap second),
@@ -367,10 +393,10 @@ export default class Duration {
 		// Therefore they can't bubble up
 
 		// But 1 year always has 12 months
-		if (this._months >= 12) {
+		if ((this._months ?? 0) >= 12) {
 			this._years = this._years || 0
-			this._years += Math.floor(this._months / 12)
-			this._months = this._months % 12
+			this._years += Math.floor(this._months! / 12)
+			this._months = this._months! % 12
 		}
 
 		return this
@@ -386,21 +412,21 @@ export default class Duration {
 
 		// Assmues that 1 day has 24 hours and 1 month has 30 days
 
-		if (this._hours >= 24) {
+		if ((this._hours ?? 0) >= 24) {
 			this._days = this._days || 0
-			this._days += Math.floor(this._hours / 24)
-			this._hours = this._hours % 24
+			this._days += Math.floor(this._hours! / 24)
+			this._hours = this._hours! % 24
 		}
 
 		if (this._months) {
-			this._days += this._months * 30
+			this._days = (this._days || 0) + this._months * 30
 			delete this._months
 		}
 
-		if (this._days >= 365) {
+		if ((this._days ?? 0) >= 365) {
 			this._years = this._years || 0
-			this._years += Math.floor(this._days / 365)
-			this._days = this._days % 365
+			this._years += Math.floor(this._days! / 365)
+			this._days = this._days! % 365
 		}
 
 		return this

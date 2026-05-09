@@ -1,6 +1,6 @@
 import runTest from 'ava'
 import expect from 'unexpected'
-import Duration from '../source/index.js'
+import Duration from '../source/index'
 
 
 runTest('long format with multiple units', test => {

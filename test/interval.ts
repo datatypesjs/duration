@@ -1,6 +1,6 @@
 import runTest from 'ava'
 import expect from 'unexpected'
-import Duration from '../source/index.js'
+import Duration from '../source/index'
 
 
 runTest('start + end rebuilds duration', test => {
@@ -15,7 +15,7 @@ runTest('start + duration derives end', test => {
 	const duration = new Duration('PT2H')
 		.setStart(new Date('2024-01-01T00:00:00Z'))
 	expect(
-		duration.end.toISOString(),
+		duration.end!.toISOString(),
 		'to equal',
 		'2024-01-01T02:00:00.000Z'
 	)
@@ -25,7 +25,7 @@ runTest('end + duration derives start', test => {
 	const duration = new Duration('PT2H')
 		.setEnd(new Date('2024-01-01T02:00:00Z'))
 	expect(
-		duration.start.toISOString(),
+		duration.start!.toISOString(),
 		'to equal',
 		'2024-01-01T00:00:00.000Z'
 	)

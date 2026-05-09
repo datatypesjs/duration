@@ -1,6 +1,6 @@
 import runTest from 'ava'
 import expect from 'unexpected'
-import Duration from '../source/index.js'
+import Duration from '../source/index'
 
 runTest('get milliseconds', test => {
 	const duration = new Duration('P0.345S')
