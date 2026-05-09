@@ -192,6 +192,77 @@ export default class Duration {
 	toJSON () { return this.string }
 
 
+	toHumanReadable (format = 'long') {
+		const longLabels = {
+			years: ['Year', 'Years'],
+			months: ['Month', 'Months'],
+			weeks: ['Week', 'Weeks'],
+			days: ['Day', 'Days'],
+			hours: ['Hour', 'Hours'],
+			minutes: ['Minute', 'Minutes'],
+			seconds: ['Second', 'Seconds'],
+			milliseconds: ['Millisecond', 'Milliseconds'],
+		}
+		const shortLabels = {
+			years: 'y',
+			months: 'mo',
+			weeks: 'w',
+			days: 'd',
+			hours: 'h',
+			minutes: 'm',
+			seconds: 's',
+			milliseconds: 'ms',
+		}
+
+		const setFragments = durationFragments.filter(fragment =>
+			typeof this[fragment] === 'number' &&
+			!Number.isNaN(this[fragment])
+		)
+
+		if (setFragments.length === 0) return ''
+
+		if (format === 'long') {
+			return setFragments
+				.map(fragment => {
+					const value = this[fragment]
+					const [singular, plural] = longLabels[fragment]
+					return `${value} ${value === 1 ? singular : plural}`
+				})
+				.join(', ')
+		}
+
+		if (format === 'short') {
+			return setFragments
+				.map(fragment => `${this[fragment]} ${shortLabels[fragment]}`)
+				.join(', ')
+		}
+
+		if (format === 'clock') {
+			const bigUnits = ['years', 'months', 'weeks', 'days']
+			const bigParts = setFragments
+				.filter(fragment => bigUnits.includes(fragment))
+				.map(fragment => `${this[fragment]} ${shortLabels[fragment]}`)
+
+			const hasTimeUnits = setFragments.some(fragment =>
+				['hours', 'minutes', 'seconds'].includes(fragment)
+			)
+
+			const parts = bigParts.slice()
+			if (hasTimeUnits) {
+				const pad = number => String(number).padStart(2, '0')
+				const time =
+					`${pad(this._hours || 0)}:` +
+					`${pad(this._minutes || 0)}:` +
+					`${pad(this._seconds || 0)} h`
+				parts.push(time)
+			}
+			return parts.join(', ')
+		}
+
+		throw new Error(`Unknown format "${format}"`)
+	}
+
+
 	get object () {
 		return durationFragments.reduce(
 			(object, fragment) => {
