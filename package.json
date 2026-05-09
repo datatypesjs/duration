@@ -20,8 +20,15 @@
   ],
   "author": "Adrian Sieber",
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@stylistic/eslint-plugin": "^5.5.0",
     "@types/node": "^25.6.2",
     "ava": "^6.4.1",
+    "dprint": "^0.50.2",
+    "eslint": "^9.19.0",
+    "eslint-config-javascript": "^3.0.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.6.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "unexpected": "^10.4.0"
