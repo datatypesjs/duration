@@ -35,12 +35,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/datatypes/duration.git"
+    "url": "git+https://github.com/datatypesjs/duration.git"
   },
   "bugs": {
-    "url": "https://github.com/datatypes/duration/issues"
+    "url": "https://github.com/datatypesjs/duration/issues"
   },
-  "homepage": "https://github.com/datatypes/duration#readme",
+  "homepage": "https://github.com/datatypesjs/duration#readme",
   "license": "ISC",
   "ava": {
     "files": [
